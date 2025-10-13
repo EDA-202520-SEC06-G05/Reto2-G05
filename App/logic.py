@@ -1,11 +1,22 @@
 import time
+from DataStructures.List import array_list as al
+from DataStructures.Map import map_linear_probing as lp
+import csv
+import os
+
+data_dir = os.path.dirname(os.path.realpath('__file__')) + '/Data/Challenge-2'
 
 def new_logic():
     """
     Crea el catalogo para almacenar las estructuras de datos
     """
     #TODO: Llama a las funciónes de creación de las estructuras de datos
-    pass
+    catalog = {
+        "Neighborhoods": None,
+        "taxis_info": None}
+    catalog["Neighborhoods"] = al.new_list()
+    catalog["taxis_info"] = lp.new_map(10000, 0.7)
+    return catalog
 
 
 # Funciones para la carga de datos
@@ -14,12 +25,148 @@ def load_data(catalog, filename):
     """
     Carga los datos del reto
     """
+    taxi = load_taxis(catalog)
+    neigh = load_neigh(catalog)
+    return taxi, neigh
     # TODO: Realizar la carga de datos
-    pass
 
 # Funciones de consulta sobre el catálogo
 
+def load_neigh(catalog):
+    neigh_file = data_dir + "/nyc-neighborhoods.csv"
+    input_file = csv.DictReader(open(neigh_file, encoding="uft-8"), delimiter=";")
+    for neigh in input_file:
+        add_neigh(catalog, neigh)
+    return neigh_size(catalog)
 
+def load_taxis(catalog):
+    
+    inicio = get_time()
+    trip_total = 0
+    min_trip = None
+    max_trip = None
+    first5 = al.new_list()
+    last5 = al.new_list()
+    
+    
+    taxi_file = data_dir + "/taxis-small.csv"
+    input_file = csv.DictReader(open(taxi_file, encoding="utf-8", delimeter=","))
+    for taxi in input_file:
+        if taxi and "pickup_datetime" in taxi and "dropoff_datetime" in taxi:
+            add_taxi(catalog, taxi)
+            trip_total += 1
+            
+            pick_up = taxi["pickup_datetime"]
+            dropoff = taxi["dropoff_datetime"]
+            start = pick_up[11:16]
+            finish = dropoff[11:16]
+            
+            h1str, m1str = start.split(":")
+            h2str, m2str = finish.split(":")
+            
+            h1, m1 = int(h1str), int(m1str)
+            h2, m2 = int(h2str), int(m2str)
+            
+            duration = (h2 *60 + m2) - (h1 *60 + m1)
+            if duration < 0:
+                duration += 24*60
+        
+            distance = float(taxi["trip_distance"])
+            cost = float(taxi["total_amount"])
+            
+            register = {
+                "pickup_datetime": pick_up,
+                "dropoff_datetime": dropoff,
+                "duration_min": duration,
+                "distance": distance,
+                "cost": cost    
+            }
+            if al.size(first5) < 5:
+                al.add_last(first5, register)
+
+            al.add_last(last5, register)
+            if al.size(last5) > 5:
+                al.remove_first(last5)
+
+            if distance > 0:
+                if min_trip is None or distance < min_trip["distance"]:
+                    min_trip = {
+                        "pickup_datetime": pick_up,
+                        "distance": distance,
+                        "cost": cost
+                    }
+
+            if max_trip is None or distance > max_trip["distance"]:
+                max_trip = {
+                    "pickup_datetime": pick_up,
+                    "distance": distance,
+                    "cost": cost
+                }
+    final = get_time()       
+
+    return {
+        "load_time": final - inicio,
+        "total_trips": trip_total,
+        "min_trip": min_trip,
+        "max_trip": max_trip,
+        "first5": first5,
+        "last5": last5      
+    }
+    
+def add_neigh(catalog, neigh):
+    n = new_neigh(
+        neigh["borough"],
+        neigh["neighborhood"],
+        neigh["latitude"],
+        neigh["longitude"]
+        )
+    al.add_last(catalog["Neighborhoods"], n)
+    return catalog
+
+def add_taxi(catalog, taxi):
+    taxi_map = catalog["taxis_info"]
+    key = taxi_map["size"]+1
+    lp.put(taxi_map,key,taxi)
+    return catalog
+
+    
+def new_neigh(borough, neighbor, lat, longi):
+    neigh = {"borough":borough, 
+            "neighborhood":neighbor, 
+            "latitude":lat, 
+            "longitude": longi}   
+    return neigh  
+  
+def new_taxi_info(pickup, dropoff, passenger_count, trip_dist, 
+                  pickup_longitude, pickup_latitude, rate_code, drop_long, drop_lat, payment, fare, extra, mta_tax, tip, tolls, improve, total):
+    
+    taxi_info = {"pickup_datetime":pickup, 
+                "dropoff_datetime":dropoff, 
+                "passenger_count":passenger_count, 
+                "trip_distance": trip_dist, 
+                "pickup_longitude": pickup_longitude,
+                "pickup_latitude":pickup_latitude, 
+                "rate_code": rate_code, 
+                "dropoff_longitude": drop_long, 
+                "dropoff_latitude": drop_lat, 
+                "payment_type":payment, 
+                "fare_amount":fare,
+                "extra": extra, 
+                "mta_tax": mta_tax, 
+                "tip_amount": tip, 
+                "tolls_amount": tolls, 
+                "improvement_surcharge": improve, 
+                "total_amount":total}
+    return taxi_info
+
+def neigh_size(catalog):
+    return al.size(catalog["Neighborhoods"])
+
+def taxi_size(catalog):
+    part1 = catalog["taxis_info"]
+    part2 = part1["size"]
+    return part2
+   
 def req_1(catalog):
     """
     Retorna el resultado del requerimiento 1
@@ -28,12 +175,61 @@ def req_1(catalog):
     pass
 
 
-def req_2(catalog):
+def req_2(catalog, coor_ini, coor_fin, n):
     """
     Retorna el resultado del requerimiento 2
     """
+    start = get_time()
+    filtered = al.new_list()
+    table = catalog["taxis_info"]["table"]    
+    for entry in table["elements"]:
+        if entry["value"] is not None:
+            taxi = entry["value"]
+            
+            if taxi["pickup_latitude"] != "" and taxi["pickup_longitude"] != "":
+                lat = float(taxi["pickup_latitude"])
+                lon = float(taxi["pickup_longitude"])
+                
+                if coor_ini <= lat <= coor_fin:
+                    register = {
+                        "pickup_datetime": taxi["pickup_datetime"],
+                        "dropoff_datetime": taxi["dropoff_datetime"],
+                        "pickup_latitude": lat,
+                        "pickup_longitude": lon,
+                        "dropoff_latitude": float(taxi["dropoff_latitude"]),
+                        "dropoff_longitude": float(taxi["dropoff_longitude"]),
+                        "distance": float(taxi["trip_distance"]),
+                        "total_amount": float(taxi["total_amount"])
+                    }
+                    al.add_last(filtered, register)
+    trip_total = al.size(filtered)
+    
+    def sort_crit(a,b):
+        if a["pickup_latitude"] > b["pickup_latitude"]:
+            return True
+        elif a["pickup_latitude"] == b["pickup_latitude"]:
+            return a["pickup_longitude"] > b ["pickup_longitude"]
+        else:
+            return False
+    al.shell_sort(filtered, sort_crit)
+    
+    if trip_total <= 2*n:
+        first = filtered["elements"]
+        last = []
+    else:
+        first = filtered["elements"][:n]
+        last = filtered["elements"][-n:]
+    
+    end = get_time()
+    
+    return {
+        "load_time": end - start,
+        "trip_total": trip_total,
+        "first": first,
+        "last": last
+    }    
     # TODO: Modificar el requerimiento 2
-    pass
+
 
 
 def req_3(catalog):

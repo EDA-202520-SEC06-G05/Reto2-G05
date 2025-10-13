@@ -120,3 +120,118 @@ def sub_list(my_list, pos_i, num_elements):
             "size" : num_elements
             }
         return new_sublist
+
+def default_sort_criteria(element_1, element_2):
+    return element_1 <= element_2
+
+def selection_sort(my_list, sort_crit):
+    elements = my_list["elements"]
+    size = my_list["size"]
+
+    for i in range(size - 1):
+        min_idx = i
+        for j in range(i + 1, size):
+            if not sort_crit(elements[min_idx], elements[j]):
+                min_idx = j
+        elements[i], elements[min_idx] = elements[min_idx], elements[i]
+
+    return my_list
+
+def insertion_sort(my_list, sort_crit):
+    
+    elements = my_list["elements"]
+    
+    for i in range(1, my_list["size"]):
+        key = elements[i]
+        j = i - 1
+        while j >= 0 and not sort_crit(elements[j],key):
+            elements[j+1] = elements[j]
+            j -= 1
+        elements[j+1] = key
+    return my_list    
+    
+    
+def shell_sort(my_list, sort_crit):
+ 
+    gap = my_list["size"] // 2
+    elements = my_list["elements"]
+    
+    if (my_list["elements"] == None) or (my_list["size"] == 1):
+        return my_list
+    else:
+        while gap > 0:
+            for i in range(gap, my_list["size"]):
+                tempo = elements[i]
+                j = i
+                while j >= gap and not sort_crit(elements[j - gap], tempo):
+                    elements[j] = elements[j - gap]
+                    j -= gap
+                elements[j] = tempo
+            gap //= 2
+            
+        return my_list
+    
+def merge_sort(my_list, sort_crit):
+    if my_list["size"] <= 1:
+        return my_list
+    else:
+        mid = my_list["size"] // 2
+        left = new_list()
+        right = new_list()
+        
+        for i in range(mid):
+            add_last(left, my_list["elements"][i])
+        for i in range(mid, my_list["size"]):
+            add_last(right, my_list["elements"][i])
+        
+        merge_sort(left, sort_crit)
+        merge_sort(right, sort_crit)
+        
+        i = 0
+        j = 0
+        
+        temp = new_list()
+        while i < left["size"] and j < right["size"]:
+            if sort_crit(left["elements"][i], right["elements"][j]):
+                add_last(temp, left["elements"][i])
+                i += 1
+            else:
+                add_last(temp, right["elements"][j])
+                j += 1
+        while i < left["size"]:
+            add_last(temp, left["elements"][i])
+            i += 1
+        while j < right["size"]:
+            add_last(temp, right["elements"][j])
+            j += 1
+        
+        my_list["elements"] = temp["elements"]
+        my_list["size"] = temp["size"]
+        
+        return my_list
+
+def quick_sort(my_list, sort_crit):
+    if my_list["size"] <= 1:
+        return my_list
+    else:
+        pivot = my_list["elements"][-1]
+        left = new_list()
+        right = new_list()
+        
+        for i in range (my_list["size"]-1):
+            elem = my_list["elements"][i]
+            if sort_crit(elem, pivot):
+                add_last(left, elem)
+            else:
+                add_last(right, elem)
+        sorted_left = quick_sort(left, sort_crit)
+        sorted_right = quick_sort(right, sort_crit)
+        
+        result = new_list()
+        for e in sorted_left["elements"]:
+            add_last(result, e)
+        add_last(result, pivot)
+        for e in sorted_right["elements"]:
+            add_last(result, e)
+   
+        return result
