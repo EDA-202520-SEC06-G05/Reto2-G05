@@ -233,5 +233,4 @@ def quick_sort(my_list, sort_crit):
         add_last(result, pivot)
         for e in sorted_right["elements"]:
             add_last(result, e)
-   
         return result

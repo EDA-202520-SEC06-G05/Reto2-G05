@@ -11,11 +11,14 @@ def new_logic():
     Crea el catalogo para almacenar las estructuras de datos
     """
     #TODO: Llama a las funciónes de creación de las estructuras de datos
+    
     catalog = {
         "Neighborhoods": None,
         "taxis_info": None}
+    
     catalog["Neighborhoods"] = al.new_list()
     catalog["taxis_info"] = lp.new_map(10000, 0.7)
+    
     return catalog
 
 
