@@ -21,7 +21,6 @@ def new_logic():
     
     return catalog
 
-
 # Funciones para la carga de datos
 
 def load_data(catalog, filename):
@@ -139,7 +138,7 @@ def new_neigh(borough, neighbor, lat, longi):
             "latitude":lat, 
             "longitude": longi}   
     return neigh  
-  
+
 def new_taxi_info(pickup, dropoff, passenger_count, trip_dist, 
                   pickup_longitude, pickup_latitude, rate_code, drop_long, drop_lat, payment, fare, extra, mta_tax, tip, tolls, improve, total):
     
@@ -169,7 +168,7 @@ def taxi_size(catalog):
     part1 = catalog["taxis_info"]
     part2 = part1["size"]
     return part2
-   
+
 def req_1(catalog):
     """
     Retorna el resultado del requerimiento 1
@@ -235,11 +234,64 @@ def req_2(catalog, coor_ini, coor_fin, n):
 
 
 
-def req_3(catalog):
+def req_3(catalog, initial_distance, final_distance, n):
     """
     Retorna el resultado del requerimiento 3
     """
+    start = get_time()
+    result =  {
+        "time_total": 0, 
+        "trip_total" : 0,
+        "first" : al.new_list(),
+        "last" : al.new_list()
+    }
+    
+    table = catalog["taxis_info"]["table"]
+    filtred = al.new_list()
+    for i in table["elements"]:
+        if i and float(i["trip_distance"]) >= initial_distance and float(i["trip_distance"]) <= final_distance:
+            result["trip_total"] += 1
+            each = {
+                "pickup_datetime": i["pickup_datetime"],
+                "pickup_longitude": float(i["pickup_longitude"]),
+                "pickup_latitude": i["pickup_latitude"],
+                "dropoff_datetime": i["dropoff_datetime"],
+                "dropoff_longitude": i["dropoff_longitude"],
+                "dropoff_latitude": i["dropoff_latitude"],
+                "trip_distance": float(i["trip_distance"]),
+                "total_amount": float(i["total_amount"])
+            }
+            al.add_last(filtred,each)
+            
+    def sort_crit(a,b):
+        centinela = False
+        if a["trip_distance"] > b["trip_distance"]:
+            centinela = True 
+        elif a["trip_distance"] == b["trip_distance"]:
+            if a["total_amount"] > b["total_amount"]:
+                centinela = True
+                
+        return centinela 
+    
+    al.merge_sort(filtred, sort_crit)
+    if al.size(filtred) == 0:
+        end = get_time()
+        result["time_total"] = delta_time(start,end)
+        return result
+    elif al.size(filtred) <=2*n:
+        result["first"] = filtred
+        end = get_time()
+        result["time_total"] = delta_time(start,end)
+    else:
+        result["first"] = al.sub_list(filtred,1,n)
+        result["last"] = al.sub_list(filtred,al.size(filtred)-n + 1,n)
+        end = get_time()
+        result["time_total"] = delta_time(start,end)
+    
+    return result
+
     # TODO: Modificar el requerimiento 3
+    
     pass
 
 
