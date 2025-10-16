@@ -294,7 +294,7 @@ def req_4(catalog):
     pass
 
 
-def req_5(catalog, object_time, n):
+def req_5(catalog, object_time, n):     
     
     """
     Retorna el resultado del requerimiento 5
@@ -309,45 +309,51 @@ def req_5(catalog, object_time, n):
     
     table = catalog["taxis_info"]["table"]
     map_new = lp.new_map(10000,0.6)
-    
+    lp.put(map_new, object_time, al.new_list())
     for i in table["elements"]:
-        if i["value"] is not None:
+        if i is not None:
             single = i["value"]
-            format_date = single["dropoff_datetime"][:10] + "" + single["dropoff_datetime"][11:13]
+            format_date = single["dropoff_datetime"][:10] + " " + single["dropoff_datetime"][11:13]
             if format_date == object_time:
-                result["trip_total"] +=1
-                lp.put(map_new,format_date, single)
-    
-    filtred = al.new_list()
-    for i in (lp.size(map_new)):
-        value = lp.get(map_new, object_time)
-        al.add_last(filtred, value)
-    
+                single = {
+                    "pickup_datetime": single["pickup_datetime"],
+                    "pickup_longitude": single["pickup_longitude"],
+                    "pickup_latitude": single["pickup_latitude"],
+                    "dropoff_datetime": single["dropoff_datetime"],
+                    "dropoff_longitude":  single["dropoff_longitude"],
+                    "dropoff_latitude":  single["dropoff_latitude"],
+                    "trip_distance": float(single["trip_distance"]),
+                    "total_amount": float(single["total_amount"])                
+                }   
+                array_map = lp.get(map_new,object_time)
+                al.add_last(array_map, single)
+                
+    array = lp.get(map_new,object_time)
     def sort_crit(a,b):
         centinela = False
-        if a["trip_distance"] > b["trip_distance"]:
+        if a["dropoff_datetime"] > b["dropoff_datetime"]:
             centinela = True 
-        elif a["trip_distance"] == b["trip_distance"]:
-            if a["total_amount"] > b["total_amount"]:
-                centinela = True
                 
         return centinela
-    al.merge_sort(filtred,sort_crit)
+    al.merge_sort(array,sort_crit)
     
-    if al.size(filtred) == 0:
+    if al.size(array) == 0:
         end_time = get_time()
         result["time_total"] = delta_time(start_time,end_time)
+        result["trip_total"] = 0
         return result
-    elif al.size(filtred) <= 2*n:
-        result["first"] = filtred
+    elif al.size(array) <= 2*n:
+        result["first"] = array
         end_time = get_time()
         result["time_total"] = delta_time(start_time,end_time)
-        
+        result["trip_total"] = al.size(array)
     else:
-        result["first"] = al.sub_list(filtred,1,n)
-        result["last"] = al.sub_list(filtred,al.size(filtred)-n + 1,n)
+        result["first"] = al.sub_list(array,0,n)
+        result["last"] = al.sub_list(array,al.size(array)-n,n)
         end_time = get_time()
         result["time_total"] = delta_time(start_time,end_time)
+        result["trip_total"] = al.size(array)
+        
     return result
     
     
