@@ -6,24 +6,23 @@ import os
 
 data_dir = os.path.dirname(os.path.realpath('__file__')) + '/Data/Challenge-2'
 
-def new_logic():
+def new_logic(data_structure):
     """
     Crea el catalogo para almacenar las estructuras de datos
     """
     #TODO: Llama a las funciónes de creación de las estructuras de datos
-    
     catalog = {
         "Neighborhoods": None,
         "taxis_info": None}
     
     catalog["Neighborhoods"] = al.new_list()
-    catalog["taxis_info"] = lp.new_map(10000, 0.7)
+    catalog["taxis_info"] = lp.new_map(10000, 0.7,None)
     
     return catalog
 
 # Funciones para la carga de datos
 
-def load_data(catalog, filename):
+def load_data(catalog):
     """
     Carga los datos del reto
     """
@@ -52,7 +51,7 @@ def load_taxis(catalog):
     
     
     taxi_file = data_dir + "/taxis-small.csv"
-    input_file = csv.DictReader(open(taxi_file, encoding="utf-8", delimeter=","))
+    input_file = csv.DictReader(open(taxi_file, encoding="utf-8"), delimiter=",")
     for taxi in input_file:
         if taxi and "pickup_datetime" in taxi and "dropoff_datetime" in taxi:
             add_taxi(catalog, taxi)
