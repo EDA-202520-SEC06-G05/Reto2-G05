@@ -242,14 +242,12 @@ def req_3(catalog, initial_distance, final_distance, n):
                 result["trip_total"] += 1
                 each = {
                     "pickup_datetime": single["pickup_datetime"],
-                    "pickup_longitude": single["pickup_longitude"],
-                    "pickup_latitude": single["pickup_latitude"],
+                    "pickup_longitude_latitude": [single["pickup_longitude"],single["pickup_latitude"]],
                     "dropoff_datetime": single["dropoff_datetime"],
-                    "dropoff_longitude":  single["dropoff_longitude"],
-                    "dropoff_latitude":  single["dropoff_latitude"],
-                    "trip_distance": distance,
-                    "total_amount": float(single["total_amount"])
-                }
+                    "dropoff_longitude_latitude":  [single["dropoff_longitude"],single["dropoff_latitude"]],
+                    "trip_distance": float(single["trip_distance"]),
+                    "total_amount": float(single["total_amount"])                
+                }   
                 al.add_last(filtred,each)
             
     def sort_crit(a,b):
@@ -317,11 +315,9 @@ def req_5(catalog, object_time, n):
             if format_date == object_time:
                 single = {
                     "pickup_datetime": single["pickup_datetime"],
-                    "pickup_longitude": single["pickup_longitude"],
-                    "pickup_latitude": single["pickup_latitude"],
+                    "pickup_longitude_latitude": [single["pickup_longitude"],single["pickup_latitude"]],
                     "dropoff_datetime": single["dropoff_datetime"],
-                    "dropoff_longitude":  single["dropoff_longitude"],
-                    "dropoff_latitude":  single["dropoff_latitude"],
+                    "dropoff_longitude_latitude":  [single["dropoff_longitude"],single["dropoff_latitude"]],
                     "trip_distance": float(single["trip_distance"]),
                     "total_amount": float(single["total_amount"])                
                 }   
@@ -364,6 +360,12 @@ def req_6(catalog):
     """
     Retorna el resultado del requerimiento 6
     """
+    
+    result = {
+        "time_total": 0,
+        "trip_total": 0,
+        
+    }
     # TODO: Modificar el requerimiento 6
     pass
 
