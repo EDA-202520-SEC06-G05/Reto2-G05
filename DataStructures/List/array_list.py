@@ -152,7 +152,7 @@ def insertion_sort(my_list, sort_crit):
     
     
 def shell_sort(my_list, sort_crit):
- 
+
     gap = my_list["size"] // 2
     elements = my_list["elements"]
     
@@ -234,3 +234,6 @@ def quick_sort(my_list, sort_crit):
         for e in sorted_right["elements"]:
             add_last(result, e)
         return result
+    
+    
+    

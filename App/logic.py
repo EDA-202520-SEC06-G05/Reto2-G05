@@ -139,28 +139,6 @@ def new_neigh(borough, neighbor, lat, longi):
             "longitude": longi}   
     return neigh  
 
-def new_taxi_info(pickup, dropoff, passenger_count, trip_dist, 
-                  pickup_longitude, pickup_latitude, rate_code, drop_long, drop_lat, payment, fare, extra, mta_tax, tip, tolls, improve, total):
-    
-    taxi_info = {"pickup_datetime":pickup, 
-                "dropoff_datetime":dropoff, 
-                "passenger_count":passenger_count, 
-                "trip_distance": trip_dist, 
-                "pickup_longitude": pickup_longitude,
-                "pickup_latitude":pickup_latitude, 
-                "rate_code": rate_code, 
-                "dropoff_longitude": drop_long, 
-                "dropoff_latitude": drop_lat, 
-                "payment_type":payment, 
-                "fare_amount":fare,
-                "extra": extra, 
-                "mta_tax": mta_tax, 
-                "tip_amount": tip, 
-                "tolls_amount": tolls, 
-                "improvement_surcharge": improve, 
-                "total_amount":total}
-    return taxi_info
-
 def neigh_size(catalog):
     return al.size(catalog["Neighborhoods"])
 
@@ -238,6 +216,14 @@ def req_3(catalog, initial_distance, final_distance, n):
     """
     Retorna el resultado del requerimiento 3
     """
+    if n <= 0:
+        return {
+        "time_total": 0, 
+        "trip_total" : 0,
+        "first" : al.new_list(),
+        "last" : al.new_list()
+    }
+    
     start = get_time()
     result =  {
         "time_total": 0, 
@@ -249,19 +235,22 @@ def req_3(catalog, initial_distance, final_distance, n):
     table = catalog["taxis_info"]["table"]
     filtred = al.new_list()
     for i in table["elements"]:
-        if i and float(i["trip_distance"]) >= initial_distance and float(i["trip_distance"]) <= final_distance:
-            result["trip_total"] += 1
-            each = {
-                "pickup_datetime": i["pickup_datetime"],
-                "pickup_longitude": float(i["pickup_longitude"]),
-                "pickup_latitude": i["pickup_latitude"],
-                "dropoff_datetime": i["dropoff_datetime"],
-                "dropoff_longitude": i["dropoff_longitude"],
-                "dropoff_latitude": i["dropoff_latitude"],
-                "trip_distance": float(i["trip_distance"]),
-                "total_amount": float(i["total_amount"])
-            }
-            al.add_last(filtred,each)
+        if i is not None:
+            single = i["value"]
+            distance = float(single["trip_distance"])
+            if distance >= initial_distance and distance <= final_distance:
+                result["trip_total"] += 1
+                each = {
+                    "pickup_datetime": single["pickup_datetime"],
+                    "pickup_longitude": single["pickup_longitude"],
+                    "pickup_latitude": single["pickup_latitude"],
+                    "dropoff_datetime": single["dropoff_datetime"],
+                    "dropoff_longitude":  single["dropoff_longitude"],
+                    "dropoff_latitude":  single["dropoff_latitude"],
+                    "trip_distance": distance,
+                    "total_amount": float(single["total_amount"])
+                }
+                al.add_last(filtred,each)
             
     def sort_crit(a,b):
         centinela = False
@@ -274,24 +263,26 @@ def req_3(catalog, initial_distance, final_distance, n):
         return centinela 
     
     al.merge_sort(filtred, sort_crit)
+    
     if al.size(filtred) == 0:
         end = get_time()
         result["time_total"] = delta_time(start,end)
         return result
+    
     elif al.size(filtred) <=2*n:
         result["first"] = filtred
         end = get_time()
         result["time_total"] = delta_time(start,end)
+        
     else:
-        result["first"] = al.sub_list(filtred,1,n)
-        result["last"] = al.sub_list(filtred,al.size(filtred)-n + 1,n)
+        result["first"] = al.sub_list(filtred,0,n)
+        result["last"] = al.sub_list(filtred,al.size(filtred)-n ,n)
         end = get_time()
         result["time_total"] = delta_time(start,end)
     
     return result
 
     # TODO: Modificar el requerimiento 3
-    
     pass
 
 
@@ -303,10 +294,63 @@ def req_4(catalog):
     pass
 
 
-def req_5(catalog):
+def req_5(catalog, object_time, n):
+    
     """
     Retorna el resultado del requerimiento 5
     """
+    start_time = get_time()
+    result = {
+        "time_total": 0,
+        "trip_total": 0,
+        "first": al.new_list(),
+        "last": al.new_list()
+    }
+    
+    table = catalog["taxis_info"]["table"]
+    map_new = lp.new_map(10000,0.6)
+    
+    for i in table["elements"]:
+        if i["value"] is not None:
+            single = i["value"]
+            format_date = single["dropoff_datetime"][:10] + "" + single["dropoff_datetime"][11:13]
+            if format_date == object_time:
+                result["trip_total"] +=1
+                lp.put(map_new,format_date, single)
+    
+    filtred = al.new_list()
+    for i in (lp.size(map_new)):
+        value = lp.get(map_new, object_time)
+        al.add_last(filtred, value)
+    
+    def sort_crit(a,b):
+        centinela = False
+        if a["trip_distance"] > b["trip_distance"]:
+            centinela = True 
+        elif a["trip_distance"] == b["trip_distance"]:
+            if a["total_amount"] > b["total_amount"]:
+                centinela = True
+                
+        return centinela
+    al.merge_sort(filtred,sort_crit)
+    
+    if al.size(filtred) == 0:
+        end_time = get_time()
+        result["time_total"] = delta_time(start_time,end_time)
+        return result
+    elif al.size(filtred) <= 2*n:
+        result["first"] = filtred
+        end_time = get_time()
+        result["time_total"] = delta_time(start_time,end_time)
+        
+    else:
+        result["first"] = al.sub_list(filtred,1,n)
+        result["last"] = al.sub_list(filtred,al.size(filtred)-n + 1,n)
+        end_time = get_time()
+        result["time_total"] = delta_time(start_time,end_time)
+    return result
+    
+    
     # TODO: Modificar el requerimiento 5
     pass
 
