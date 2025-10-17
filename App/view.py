@@ -135,6 +135,17 @@ def print_req_6(control):
     """
         Función que imprime la solución del Requerimiento 6 en consola
     """
+    neighborhood = input("Ingrese el nombre del barrio de recogida: ")
+    hour_initial = int(input("Ingrese la hora inicial con el formato %H: "))
+    hour_final = int(input("Ingrese la hora final con el formato %H: "))
+    size =int(input("Ingrese el número de datos a visualizar: "))
+    result = lg.req_6(control,neighborhood,hour_initial,hour_final,size)
+    print("\n=== RESULTADO REQ 6 ===")
+    print(f"Tiempo de ejecución: {result['load_time']} ms")
+    print(f"Total trayectos: {result['trip_total']}")
+    print(f"Primeros {size} trayectos: {result['first']}")
+    print(f"Ultimos {size} trayectos: {result['last']}")
+    
     # TODO: Imprimir el resultado del requerimiento 6
     pass
 
@@ -169,7 +180,7 @@ def main():
         elif int(inputs) == 5:
             print_req_5(control)
 
-        elif int(inputs) == 5:
+        elif int(inputs) == 6:
             print_req_6(control)
 
         elif int(inputs) == 7:

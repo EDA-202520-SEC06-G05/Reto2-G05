@@ -417,12 +417,12 @@ def req_6(catalog,barrio,hora_ini,hora_fin,n):
     (Trayectos con recogida en un barrio de NY y en un rango de horas de recogida)
     """
     inicio=get_time()
-    barrios_tabla=catalog["neighborhoods_info"]["table"]
+    barrios_tabla=catalog["Neighborhoods"]["elements"]
     taxis_tabla=catalog["taxis_info"]["table"]
     filtrados=al.new_list()
     barrio_lat=None
     barrio_lon=None
-    for fila in barrios_tabla["elements"]:
+    for fila in barrios_tabla:
         if fila["value"]!=None:
             info=fila["value"]
             nombre=info["neighborhood"].strip().lower()
