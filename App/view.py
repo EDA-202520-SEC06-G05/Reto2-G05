@@ -29,7 +29,7 @@ def load_data(control):
     """
     taxis, neighborhoods = lg.load_data(control)
     print("\n=== DATOS CARGADOS ===")
-    print(taxis,neighborhoods)
+    return print(taxis,neighborhoods)
     #TODO: Realizar la carga de datos
     pass
 

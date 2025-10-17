@@ -35,7 +35,7 @@ def load_data(catalog):
 
 def load_neigh(catalog):
     neigh_file = data_dir + "/nyc-neighborhoods.csv"
-    input_file = csv.DictReader(open(neigh_file, encoding="uft-8"), delimiter=";")
+    input_file = csv.DictReader(open(neigh_file, encoding="utf-8"), delimiter=";")
     for neigh in input_file:
         add_neigh(catalog, neigh)
     return neigh_size(catalog)
@@ -277,7 +277,7 @@ def req_3(catalog, initial_distance, final_distance, n):
     table = catalog["taxis_info"]["table"]
     filtred = al.new_list()
     for i in table["elements"]:
-        if i is not None:
+        if i["value"] is not None:
             single = i["value"]
             distance = float(single["trip_distance"])
             if distance >= initial_distance and distance <= final_distance:
@@ -348,10 +348,10 @@ def req_5(catalog, object_time, n):
     }
     
     table = catalog["taxis_info"]["table"]
-    map_new = lp.new_map(10000,0.6)
+    map_new = lp.new_map(10000,0.6,None)
     lp.put(map_new, object_time, al.new_list())
     for i in table["elements"]:
-        if i is not None:
+        if i["value"] is not None:
             single = i["value"]
             format_date = single["dropoff_datetime"][:10] + " " + single["dropoff_datetime"][11:13]
             if format_date == object_time:
@@ -362,7 +362,7 @@ def req_5(catalog, object_time, n):
                     "dropoff_longitude_latitude":  [single["dropoff_longitude"],single["dropoff_latitude"]],
                     "trip_distance": float(single["trip_distance"]),
                     "total_amount": float(single["total_amount"])                
-                }   
+                } 
                 array_map = lp.get(map_new,object_time)
                 al.add_last(array_map, single)
                 

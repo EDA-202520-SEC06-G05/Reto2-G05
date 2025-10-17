@@ -50,18 +50,33 @@ def find_slot(my_map, key, hash_value):
     first_avail = None
     found = False
     ocupied = False
-    while not found:
-        if is_available(my_map["table"], hash_value):
+
+    pos = hash_value
+    steps = 0
+    cap = my_map["capacity"]
+
+    while not found and steps < cap:
+        # ⚠️ OJO con base de índices de al.get_element: usa pos o pos+1 según tu TAD
+        entry = al.get_element(my_map["table"], pos)
+
+        if is_available(my_map["table"], pos):
             if first_avail is None:
-                first_avail = hash_value
-            entry = al.get_element(my_map["table"], hash_value)
+                first_avail = pos
+            # celda nunca usada: podemos terminar búsqueda
             if me.get_key(entry) is None:
                 found = True
-        elif default_compare(key, al.get_element(my_map["table"], hash_value)) == 0:
-            first_avail = hash_value
+
+        elif default_compare(key, entry) == 0:
+            # misma clave → sobrescribir
+            first_avail = pos
             found = True
             ocupied = True
-    hash_value = (hash_value + 1) % my_map["capacity"]
+
+        # avanzar probing
+        pos = (pos + 1) % cap
+        steps += 1
+
+    # si no lo encontró en cap pasos, la tabla está llena
     return ocupied, first_avail
 
 def rehash(my_map):
@@ -110,15 +125,25 @@ def contains(my_map, key):
         return False
     
 def get(my_map, key):
-    hash_index = mp.hash_value(my_map, key)
-    slot = find_slot(my_map, key, hash_index)
-    
-    if slot["key"] is None:
-        return None
-    if slot["key"] == key:
-        return slot["value"]
-    else:
-        return None
+    h = mp.hash_value(my_map, key)
+    pos = h
+    cap = my_map["capacity"]
+    steps = 0
 
+    while steps < cap:
+        # Nota de índice: si al.get_element es 1-based, usa (pos + 1)
+        entry = al.get_element(my_map["table"], pos)
 
-    
+        k = entry["key"]
+        if k is None:
+            # Celda nunca usada: la llave no está
+            return None
+        if k == key:
+            return entry["value"]
+
+        pos = (pos + 1) % cap
+        steps += 1
+
+    # Dimos la vuelta completa sin encontrar
+    return None
+
