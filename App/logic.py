@@ -3,7 +3,7 @@ from DataStructures.List import array_list as al
 from DataStructures.Map import map_linear_probing as lp
 import csv
 import os
-
+import math 
 data_dir = os.path.dirname(os.path.realpath('__file__')) + '/Data/Challenge-2'
 
 def new_logic(data_structure):
@@ -146,13 +146,56 @@ def taxi_size(catalog):
     part2 = part1["size"]
     return part2
 
-def req_1(catalog):
+def req_1(catalog,fecha_ini,fecha_fin,n):
     """
     Retorna el resultado del requerimiento 1
+    (Viajes con pickup_datetime entre dos fechas dadas, ordenados del más antiguo al más reciente)
     """
+    start=get_time()
+    from datetime import datetime
+    filtered=al.new_list()
+    table= catalog["taxis_info"]["table"]
+    fecha_inicial= datetime.strptime(fecha_ini,"%Y-%m-%d %H:%M:%S")
+    fecha_final= datetime.strptime(fecha_fin,"%Y-%m-%d %H:%M:%S")
+    for entry in table["elements"]:
+        if entry["value"] is not None:
+            taxi= entry["value"]
+            if taxi["pickup_datetime"]!= "":
+                pickup_date= datetime.strptime(taxi["pickup_datetime"],"%Y-%m-%d %H:%M:%S")
+                if fecha_inicial<= pickup_date<= fecha_final:
+                    register= {
+                        "pickup_datetime":taxi["pickup_datetime"],
+                        "dropoff_datetime":taxi["dropoff_datetime"],
+                        "pickup_latitude":float(taxi["pickup_latitude"]),
+                        "pickup_longitude":float(taxi["pickup_longitude"]),
+                        "dropoff_latitude":float(taxi["dropoff_latitude"]),
+                        "dropoff_longitude":float(taxi["dropoff_longitude"]),
+                        "distance":float(taxi["trip_distance"]),
+                        "total_amount":float(taxi["total_amount"])
+                    }
+                    al.add_last(filtered, register)
+    trip_total= al.size(filtered)
+    def sort_crit(a, b):
+        fecha_a= datetime.strptime(a["pickup_datetime"], "%Y-%m-%d %H:%M:%S")
+        fecha_b= datetime.strptime(b["pickup_datetime"], "%Y-%m-%d %H:%M:%S")
+        return fecha_a< fecha_b
+    al.shell_sort(filtered, sort_crit)
+    if trip_total<=2* n:
+        first= filtered["elements"]
+        last= []
+    else:
+        first= filtered["elements"][:n]
+        last= filtered["elements"][-n:]
+    end= get_time()
+    return{
+        "load_time": (end - start)*1000,
+        "trip_total": trip_total,
+        "first": first,
+        "last":last
+        }
     # TODO: Modificar el requerimiento 1
     pass
-
+{}
 
 def req_2(catalog, coor_ini, coor_fin, n):
     """
@@ -355,16 +398,83 @@ def req_5(catalog, object_time, n):
     # TODO: Modificar el requerimiento 5
     pass
 
-def req_6(catalog):
+def haversine(lat1,lon1,lat2,lon2):
+    r=6371
+    lat1=math.radians(lat1)
+    lon1=math.radians(lon1)
+    lat2=math.radians(lat2)
+    lon2=math.radians(lon2)
+    dlat=lat2-lat1
+    dlon=lon2-lon1
+    a=math.sin(dlat/2)*2+math.cos(lat1)*math.cos(lat2)*math.sin(dlon/2)*2
+    c=2*math.atan2(math.sqrt(a),math.sqrt(1-a))
+    return r*c
+
+
+def req_6(catalog,barrio,hora_ini,hora_fin,n):
     """
     Retorna el resultado del requerimiento 6
+    (Trayectos con recogida en un barrio de NY y en un rango de horas de recogida)
     """
+    inicio=get_time()
+    barrios_tabla=catalog["neighborhoods_info"]["table"]
+    taxis_tabla=catalog["taxis_info"]["table"]
+    filtrados=al.new_list()
+    barrio_lat=None
+    barrio_lon=None
+    for fila in barrios_tabla["elements"]:
+        if fila["value"]!=None:
+            info=fila["value"]
+            nombre=info["neighborhood"].strip().lower()
+            if nombre==barrio.strip().lower():
+                barrio_lat=float(info["latitude"])
+                barrio_lon=float(info["longitude"])
+    if barrio_lat==None or barrio_lon==None:
+        return{"error":"El barrio no se encontró en los datos"}
+    hora_ini=int(hora_ini)
+    hora_fin=int(hora_fin)
+    for fila in taxis_tabla["elements"]:
+        if fila["value"]!=None:
+            taxi=fila["value"]
+            if taxi["pickup_datetime"]!="" and taxi["pickup_latitude"]!="" and taxi["pickup_longitude"]!="":
+                fecha_texto=taxi["pickup_datetime"]
+                partes=fecha_texto.split(" ")
+                if len(partes)>1:
+                    hora_partes=partes[1].split(":")
+                    if len(hora_partes)>0:
+                        hora=int(hora_partes[0])
+                        if hora_ini<=hora<=hora_fin:
+                            lat=float(taxi["pickup_latitude"])
+                            lon=float(taxi["pickup_longitude"])
+                            dist=haversine(lat,lon,barrio_lat,barrio_lon)
+                            if dist<=1.0:
+                                registro={
+                                    "pickup_datetime":taxi["pickup_datetime"],
+                                    "dropoff_datetime":taxi["dropoff_datetime"],
+                                    "pickup_latitude":lat,
+                                    "pickup_longitude":lon,
+                                    "dropoff_latitude":float(taxi["dropoff_latitude"]),
+                                    "dropoff_longitude":float(taxi["dropoff_longitude"]),
+                                    "distance":float(taxi["trip_distance"]),
+                                    "total_amount":float(taxi["total_amount"])}
+                                al.add_last(filtrados,registro)
+    total_trayectos=al.size(filtrados)
+    def criterio_orden(a,b):
+        return a["pickup_datetime"]<b["pickup_datetime"]
+    al.shell_sort(filtrados,criterio_orden)
+    if total_trayectos<=2*n:
+        primeros=filtrados["elements"]
+        ultimos=[]
+    else:
+        primeros=filtrados["elements"][:n]
+        ultimos=filtrados["elements"][-n:]
+    fin=get_time()
+    return{
+        "load_time":(fin-inicio)*1000,
+        "trip_total":total_trayectos,
+        "first":primeros,
+        "last":ultimos}
     
-    result = {
-        "time_total": 0,
-        "trip_total": 0,
-        
-    }
     # TODO: Modificar el requerimiento 6
     pass
 
