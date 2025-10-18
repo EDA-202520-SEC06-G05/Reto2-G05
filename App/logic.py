@@ -20,7 +20,6 @@ def new_logic(data_structure):
     
     return catalog
 
-# Funciones para la carga de datos
 
 def load_data(catalog):
     """
@@ -31,7 +30,6 @@ def load_data(catalog):
     return taxi, neigh
     # TODO: Realizar la carga de datos
 
-# Funciones de consulta sobre el catálogo
 
 def load_neigh(catalog):
     neigh_file = data_dir + "/nyc-neighborhoods.csv"
@@ -50,7 +48,7 @@ def load_taxis(catalog):
     last5 = al.new_list()
     
     
-    taxi_file = data_dir + "/taxis-small.csv"
+    taxi_file = data_dir + "/taxis-large.csv"
     input_file = csv.DictReader(open(taxi_file, encoding="utf-8"), delimiter=",")
     for taxi in input_file:
         if taxi and "pickup_datetime" in taxi and "dropoff_datetime" in taxi:
@@ -152,32 +150,29 @@ def req_1(catalog,fecha_ini,fecha_fin,n):
     (Viajes con pickup_datetime entre dos fechas dadas, ordenados del más antiguo al más reciente)
     """
     start=get_time()
-    from datetime import datetime
     filtered=al.new_list()
     table= catalog["taxis_info"]["table"]
-    fecha_inicial= datetime.strptime(fecha_ini,"%Y-%m-%d %H:%M:%S")
-    fecha_final= datetime.strptime(fecha_fin,"%Y-%m-%d %H:%M:%S")
+    fecha_inicial= time.strptime(fecha_ini,"%Y-%m-%d %H:%M:%S")
+    fecha_final= time.strptime(fecha_fin,"%Y-%m-%d %H:%M:%S")
     for entry in table["elements"]:
         if entry["value"] is not None:
             taxi= entry["value"]
             if taxi["pickup_datetime"]!= "":
-                pickup_date= datetime.strptime(taxi["pickup_datetime"],"%Y-%m-%d %H:%M:%S")
+                pickup_date= time.strptime(taxi["pickup_datetime"],"%Y-%m-%d %H:%M:%S")
                 if fecha_inicial<= pickup_date<= fecha_final:
                     register= {
-                        "pickup_datetime":taxi["pickup_datetime"],
-                        "dropoff_datetime":taxi["dropoff_datetime"],
-                        "pickup_latitude":float(taxi["pickup_latitude"]),
-                        "pickup_longitude":float(taxi["pickup_longitude"]),
-                        "dropoff_latitude":float(taxi["dropoff_latitude"]),
-                        "dropoff_longitude":float(taxi["dropoff_longitude"]),
-                        "distance":float(taxi["trip_distance"]),
-                        "total_amount":float(taxi["total_amount"])
+                        "pickup_datetime": taxi["pickup_datetime"],
+                        "dropoff_datetime": taxi["dropoff_datetime"],
+                        "pickup_latitude_longitude": [float(taxi["pickup_latitude"]),float(taxi["pickup_longitude"])],
+                        "dropoff_latitude_longitude": [float(taxi["dropoff_latitude"]),float(taxi["dropoff_longitude"])],
+                        "distance": float(taxi["trip_distance"]),
+                        "total_amount": float(taxi["total_amount"])
                     }
                     al.add_last(filtered, register)
     trip_total= al.size(filtered)
     def sort_crit(a, b):
-        fecha_a= datetime.strptime(a["pickup_datetime"], "%Y-%m-%d %H:%M:%S")
-        fecha_b= datetime.strptime(b["pickup_datetime"], "%Y-%m-%d %H:%M:%S")
+        fecha_a= time.strptime(a["pickup_datetime"], "%Y-%m-%d %H:%M:%S")
+        fecha_b= time.strptime(b["pickup_datetime"], "%Y-%m-%d %H:%M:%S")
         return fecha_a< fecha_b
     al.shell_sort(filtered, sort_crit)
     if trip_total<=2* n:
@@ -194,8 +189,8 @@ def req_1(catalog,fecha_ini,fecha_fin,n):
         "last":last
         }
     # TODO: Modificar el requerimiento 1
-    pass
-{}
+    
+
 
 def req_2(catalog, coor_ini, coor_fin, n):
     """
@@ -216,10 +211,8 @@ def req_2(catalog, coor_ini, coor_fin, n):
                     register = {
                         "pickup_datetime": taxi["pickup_datetime"],
                         "dropoff_datetime": taxi["dropoff_datetime"],
-                        "pickup_latitude": lat,
-                        "pickup_longitude": lon,
-                        "dropoff_latitude": float(taxi["dropoff_latitude"]),
-                        "dropoff_longitude": float(taxi["dropoff_longitude"]),
+                        "pickup_latitude_longitude": [lat,lon],
+                        "dropoff_latitude_longitude": [float(taxi["dropoff_latitude"]),float(taxi["dropoff_longitude"])],
                         "distance": float(taxi["trip_distance"]),
                         "total_amount": float(taxi["total_amount"])
                     }
@@ -277,19 +270,19 @@ def req_3(catalog, initial_distance, final_distance, n):
     table = catalog["taxis_info"]["table"]
     filtred = al.new_list()
     for i in table["elements"]:
-        if i["value"] is not None:
+        if i["value"] is not None :
             single = i["value"]
             distance = float(single["trip_distance"])
-            if distance >= initial_distance and distance <= final_distance:
+            if initial_distance <= distance <= final_distance:
                 result["trip_total"] += 1
                 each = {
                     "pickup_datetime": single["pickup_datetime"],
-                    "pickup_longitude_latitude": [single["pickup_longitude"],single["pickup_latitude"]],
+                    "pickup_latitude_longitude": [single["pickup_latitude"],single["pickup_longitude"]],
                     "dropoff_datetime": single["dropoff_datetime"],
-                    "dropoff_longitude_latitude":  [single["dropoff_longitude"],single["dropoff_latitude"]],
+                    "dropoff_latitude_longitude":  [single["dropoff_latitude"],single["dropoff_longitude"]],
                     "trip_distance": float(single["trip_distance"]),
                     "total_amount": float(single["total_amount"])                
-                }   
+                }  
                 al.add_last(filtred,each)
             
     def sort_crit(a,b):
@@ -323,15 +316,81 @@ def req_3(catalog, initial_distance, final_distance, n):
     return result
 
     # TODO: Modificar el requerimiento 3
-    pass
 
 
-def req_4(catalog):
+def req_4(catalog, obj_date, interest_m, ref_time, n):
     """
     Retorna el resultado del requerimiento 4
     """
-    # TODO: Modificar el requerimiento 4
-    pass
+    start = get_time()
+    trip_total = 0
+    taxis_map = catalog["taxis_info"]
+    dropoff_map = lp.new_map(10000, 0.7)
+    
+    table = taxis_map["table"]
+    size = taxis_map["capacity"]
+    
+    for i in range(size):
+        pair = al.get_element(table, i)
+        if pair["key"] is not None:
+            taxi = pair["value"]
+            dropoff_date = taxi["dropoff_datetime"]
+            
+            if al.size(dropoff_date) >= 10:
+                dropoff = dropoff_date[:10]
+                bucket = lp.get(dropoff_map, dropoff)
+                if bucket is None:
+                    bucket = al.new_list()
+                    lp.put(dropoff_map, dropoff, bucket)
+                al.add_last(bucket, taxi)
+                
+    map_size = lp.get(dropoff_map, obj_date) 
+    ref_h, ref_m, ref_s = ref_time.split(":")
+    ref_seg = int(ref_h)*3600 + int(ref_m)*60 + int(ref_s)
+    
+    filtered = al.new_list()
+    for i in range(al.size(map_size)):
+        trip = al.get_element(map_size, i)
+        hour = trip["dropoff_datetime"][11:19]
+        h, m, s = hour.split(":")
+        seg = int(h)*3600 + int(m)*60 + int(s)
+        
+        del trip["vendor"], trip["passengers_count"], trip["rate_code"], trip["payment_type"], trip["fare_amount"], trip["extra"], trip["mta_tax"], trip["tip_amount"], trip["tolls_amount"], trip["improvement_surcharge"]
+        trip["pickup_latitude_longitude"] = [trip["pickup_latitude"], trip["pickup_longitude"]]
+        trip["dropoff_latitude_longitude"] = [trip["dropoff_latitude"], trip["dropoff_longitude"]]
+        del trip["pickup_latitude"], trip["pickup_longitude"], trip["dropoff_latitude"], trip["dropoff_longitude"]
+        
+        if interest_m == "ANTES" and seg < ref_seg and obj_date == trip["dropoff_datetime"][:10]:
+            al.add_last(filtered, trip)
+        if interest_m == "DESPUES" and seg > ref_seg and obj_date == trip["dropoff_datetime"][:10]:
+            al.add_last(filtered, trip)
+    total_filtered = al.size(filtered)
+    
+    def sort_crit(a,b):
+        return a["dropoff_datetime"] > b["dropoff_datetime"]
+    
+    filtered = al.quick_sort(filtered, sort_crit)
+    
+    end = get_time()
+    if al.size(filtered) <= 2:
+        show_final = filtered
+        return {
+        "tiempo_ms": end - start,
+        "total_filtered": total_filtered,
+        "all": show_final
+    }
+    
+    first = al.sub_list(filtered, 0, n-1)
+    last = al.sub_list(filtered, al.size(filtered)-n, n)
+    
+    end = get_time()
+    
+    return {
+        "tiempo_ms": end - start,
+        "total_filtered": total_filtered,
+        "first5": first,
+        "last5": last
+    }  
 
 
 def req_5(catalog, object_time, n):     
@@ -357,9 +416,9 @@ def req_5(catalog, object_time, n):
             if format_date == object_time:
                 single = {
                     "pickup_datetime": single["pickup_datetime"],
-                    "pickup_longitude_latitude": [single["pickup_longitude"],single["pickup_latitude"]],
+                    "pickup_latitude_longitude": [single["pickup_latitude"],single["pickup_longitude"]],
                     "dropoff_datetime": single["dropoff_datetime"],
-                    "dropoff_longitude_latitude":  [single["dropoff_longitude"],single["dropoff_latitude"]],
+                    "dropoff_latitude_longitude":  [single["dropoff_latitude"],single["dropoff_longitude"]],
                     "trip_distance": float(single["trip_distance"]),
                     "total_amount": float(single["total_amount"])                
                 } 
@@ -396,7 +455,7 @@ def req_5(catalog, object_time, n):
     
     
     # TODO: Modificar el requerimiento 5
-    pass
+    
 
 def haversine(lat1,lon1,lat2,lon2):
     r=6371
@@ -424,13 +483,13 @@ def req_6(catalog,barrio,hora_ini,hora_fin,n):
     barrio_lon=None
     for fila in barrios_tabla:
         if fila["value"]!=None:
-            info=fila["value"]
             nombre=info["neighborhood"].strip().lower()
             if nombre==barrio.strip().lower():
                 barrio_lat=float(info["latitude"])
                 barrio_lon=float(info["longitude"])
     if barrio_lat==None or barrio_lon==None:
         return{"error":"El barrio no se encontró en los datos"}
+    
     hora_ini=int(hora_ini)
     hora_fin=int(hora_fin)
     for fila in taxis_tabla["elements"]:
@@ -478,8 +537,6 @@ def req_6(catalog,barrio,hora_ini,hora_fin,n):
     # TODO: Modificar el requerimiento 6
     pass
 
-
-# Funciones para medir tiempos de ejecucion
 
 def get_time():
     """

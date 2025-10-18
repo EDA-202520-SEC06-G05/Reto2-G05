@@ -50,9 +50,9 @@ def print_req_1(control):
     size =int(input("Ingrese el número de datos a visualizar: "))
     result = lg.req_1(control,datetime_initial,datetime_final,size)
     print("\n=== RESULTADO REQ 1 ===")
-    print(f"Tiempo de ejecución: {result['load_time']} ms")
-    print(f"Total trayectos: {result['trip_total']}")
-    print(f"Primeros {size} trayectos: {result['first']}")
+    print(f"Tiempo de ejecución: {result['load_time']} ms\n")
+    print(f"Total trayectos: {result['trip_total']}\n")
+    print(f"Primeros {size} trayectos: {result['first']}\n")
     print(f"Ultimos {size} trayectos: {result['last']}")
     # TODO: Imprimir el resultado del requerimiento 1
     pass
@@ -67,10 +67,10 @@ def print_req_2(control):
     size =int(input("Ingrese el número de datos a visualizar: "))
     
     result = lg.req_2(control,latitude_initial,latitude_final,size)
-    print("\n=== RESULTADO REQ 1 ===")
-    print(f"Tiempo de ejecución: {result['load_time']} ms")
-    print(f"Total trayectos: {result['trip_total']}")
-    print(f"Primeros {size} trayectos: {result['first']}")
+    print("\n=== RESULTADO REQ 2 ===")
+    print(f"Tiempo de ejecución: {result['load_time']} ms\n")
+    print(f"Total trayectos: {result['trip_total']}\n")
+    print(f"Primeros {size} trayectos: {result['first']}\n")
     print(f"Ultimos {size} trayectos: {result['last']}")
     
     # TODO: Imprimir el resultado del requerimiento 2
@@ -86,9 +86,9 @@ def print_req_3(control):
     size =int(input("Ingrese el número de datos a visualizar: "))
     result = lg.req_3(control,initial_distance,final_distance,size)
     print("\n=== RESULTADO REQ 3 ===")
-    print(f"Tiempo de ejecución: {result['time_total']} ms")
-    print(f"Total trayectos: {result['trip_total']}")
-    print(f"Primeros {size} trayectos: {result['first']}")
+    print(f"Tiempo de ejecución: {result['time_total']} ms\n")
+    print(f"Total trayectos: {result['trip_total']}\n")
+    print(f"Primeros {size} trayectos: {result['first']}\n")
     print(f"Ultimos {size} trayectos: {result['last']}")
     
     # TODO: Imprimir el resultado del requerimiento 3
@@ -105,9 +105,9 @@ def print_req_4(control):
     size =int(input("Ingrese el número de datos a visualizar: "))
     result = lg.req_4(control,date,crit,time,size)
     print("\n=== RESULTADO REQ 4 ===")
-    print(f"Tiempo de ejecución: {result['tiempo_ms']} ms")
-    print(f"Total trayectos: {result['total_filtered']}")
-    print(f"Primeros {size} trayectos: {result['first5']}")
+    print(f"Tiempo de ejecución: {result['tiempo_ms']} ms\n")
+    print(f"Total trayectos: {result['total_filtered']}\n")
+    print(f"Primeros {size} trayectos: {result['first5']}\n")
     print(f"Ultimos {size} trayectos: {result['last5']}")
     
     # TODO: Imprimir el resultado del requerimiento 4
@@ -122,9 +122,9 @@ def print_req_5(control):
     size =int(input("Ingrese el número de datos a visualizar: "))
     result = lg.req_5(control,object_time,size)
     print("\n=== RESULTADO REQ 5 ===")
-    print(f"Tiempo de ejecución: {result['time_total']} ms")
-    print(f"Total trayectos: {result['trip_total']}")
-    print(f"Primeros {size} trayectos: {result['first']}")
+    print(f"Tiempo de ejecución: {result['time_total']} ms\n")
+    print(f"Total trayectos: {result['trip_total']}\n")
+    print(f"Primeros {size} trayectos: {result['first']}\n")
     print(f"Ultimos {size} trayectos: {result['last']}")
     
     # TODO: Imprimir el resultado del requerimiento 5
@@ -140,10 +140,11 @@ def print_req_6(control):
     hour_final = int(input("Ingrese la hora final con el formato %H: "))
     size =int(input("Ingrese el número de datos a visualizar: "))
     result = lg.req_6(control,neighborhood,hour_initial,hour_final,size)
+    
     print("\n=== RESULTADO REQ 6 ===")
-    print(f"Tiempo de ejecución: {result['load_time']} ms")
-    print(f"Total trayectos: {result['trip_total']}")
-    print(f"Primeros {size} trayectos: {result['first']}")
+    print(f"Tiempo de ejecución: {result['load_time']} ms\n")
+    print(f"Total trayectos: {result['trip_total']}\n")
+    print(f"Primeros {size} trayectos: {result['first']}\n")
     print(f"Ultimos {size} trayectos: {result['last']}")
     
     # TODO: Imprimir el resultado del requerimiento 6
