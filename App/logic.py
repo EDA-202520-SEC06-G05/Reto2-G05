@@ -360,6 +360,7 @@ def req_4(catalog, obj_date, interest_m, ref_time, n):
         trip["dropoff_latitude_longitude"] = [trip["dropoff_latitude"], trip["dropoff_longitude"]]
         del trip["pickup_latitude"], trip["pickup_longitude"], trip["dropoff_latitude"], trip["dropoff_longitude"]
         
+        
         if interest_m == "ANTES" and seg < ref_seg and obj_date == trip["dropoff_datetime"][:10]:
             al.add_last(filtered, trip)
         if interest_m == "DESPUES" and seg > ref_seg and obj_date == trip["dropoff_datetime"][:10]:
