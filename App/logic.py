@@ -325,7 +325,7 @@ def req_4(catalog, obj_date, interest_m, ref_time, n):
     start = get_time()
     trip_total = 0
     taxis_map = catalog["taxis_info"]
-    dropoff_map = lp.new_map(10000, 0.7)
+    dropoff_map = lp.new_map(10000, 0.7, None)
     
     table = taxis_map["table"]
     size = taxis_map["capacity"]
@@ -372,7 +372,7 @@ def req_4(catalog, obj_date, interest_m, ref_time, n):
     filtered = al.quick_sort(filtered, sort_crit)
     
     end = get_time()
-    if al.size(filtered) <= 2:
+    if al.size(filtered) <= 2*n:
         show_final = filtered
         return {
         "tiempo_ms": end - start,

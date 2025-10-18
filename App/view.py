@@ -110,6 +110,7 @@ def print_req_4(control):
     print(f"Primeros {size} trayectos: {result['first5']}\n")
     print(f"Ultimos {size} trayectos: {result['last5']}")
     
+
     # TODO: Imprimir el resultado del requerimiento 4
     pass
 
@@ -140,7 +141,6 @@ def print_req_6(control):
     hour_final = int(input("Ingrese la hora final con el formato %H: "))
     size =int(input("Ingrese el número de datos a visualizar: "))
     result = lg.req_6(control,neighborhood,hour_initial,hour_final,size)
-    
     print("\n=== RESULTADO REQ 6 ===")
     print(f"Tiempo de ejecución: {result['load_time']} ms\n")
     print(f"Total trayectos: {result['trip_total']}\n")
