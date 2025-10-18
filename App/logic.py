@@ -373,7 +373,7 @@ def req_4(catalog, obj_date, interest_m, ref_time, n):
     filtered = al.quick_sort(filtered, sort_crit)
     
     end = get_time()
-    if al.size(filtered) <= 2:
+    if al.size(filtered) <= 2*n:
         show_final = filtered
         return {
         "tiempo_ms": end - start,
