@@ -325,7 +325,7 @@ def req_4(catalog, obj_date, interest_m, ref_time, n):
     start = get_time()
     trip_total = 0
     taxis_map = catalog["taxis_info"]
-    dropoff_map = lp.new_map(10000, 0.7)
+    dropoff_map = lp.new_map(10000, 0.7, None)
     
     table = taxis_map["table"]
     size = taxis_map["capacity"]
@@ -359,6 +359,7 @@ def req_4(catalog, obj_date, interest_m, ref_time, n):
         trip["pickup_latitude_longitude"] = [trip["pickup_latitude"], trip["pickup_longitude"]]
         trip["dropoff_latitude_longitude"] = [trip["dropoff_latitude"], trip["dropoff_longitude"]]
         del trip["pickup_latitude"], trip["pickup_longitude"], trip["dropoff_latitude"], trip["dropoff_longitude"]
+        
         
         if interest_m == "ANTES" and seg < ref_seg and obj_date == trip["dropoff_datetime"][:10]:
             al.add_last(filtered, trip)
