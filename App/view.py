@@ -100,7 +100,7 @@ def print_req_4(control):
         Función que imprime la solución del Requerimiento 4 en consola
     """
     date = input("Ingrese la fecha de terminacion del trayecto, con el siguiente formato (YYYY-MM-DD): ")
-    crit = input("Ingrese el momento de interes (ANTES o DESPUES): ")
+    crit = input("Ingrese el momento de interes (ANTES o DESPUES): ").upper()   
     time = input("Ingrese la hora de terminacion del trayceto, con el siguiente formato (HH:MM:SS): ")
     size =int(input("Ingrese el número de datos a visualizar: "))
     result = lg.req_4(control,date,crit,time,size)
@@ -142,10 +142,10 @@ def print_req_6(control):
     size =int(input("Ingrese el número de datos a visualizar: "))
     result = lg.req_6(control,neighborhood,hour_initial,hour_final,size)
     print("\n=== RESULTADO REQ 6 ===")
-    print(f"Tiempo de ejecución: {result['load_time']} ms\n")
-    print(f"Total trayectos: {result['trip_total']}\n")
-    print(f"Primeros {size} trayectos: {result['first']}\n")
-    print(f"Ultimos {size} trayectos: {result['last']}")
+    print(f"Tiempo de ejecución: {result['tiempo_ms']} ms\n")
+    print(f"Total trayectos: {result['total_filtered']}\n")
+    print(f"Primeros {size} trayectos: {result['first5']}\n")
+    print(f"Ultimos {size} trayectos: {result['last5']}")
     
     # TODO: Imprimir el resultado del requerimiento 6
     pass
