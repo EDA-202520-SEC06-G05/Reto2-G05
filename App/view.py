@@ -119,7 +119,7 @@ def print_req_5(control):
     """
         Función que imprime la solución del Requerimiento 5 en consola
     """
-    object_time = input("Ingrese la fecha y hora de terminacion del trayecto, con el siguiente formato (“%Y-%M-%D %H”)")
+    object_time = input("Ingrese la fecha y hora de terminacion del trayecto, con el siguiente formato (“%Y-%M-%D %H”) ")
     size =int(input("Ingrese el número de datos a visualizar: "))
     result = lg.req_5(control,object_time,size)
     print("\n=== RESULTADO REQ 5 ===")
